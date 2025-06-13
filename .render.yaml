@@ -1,0 +1,15 @@
+# .render.yaml nằm ở gốc repo
+services:
+  - type: web
+    name: ping-backend
+    env: node
+    plan: free
+    buildCommand: "echo 'Nothing to build'"
+    startCommand: "node ping.js"
+
+cron_jobs:
+  - name: keep-thuetool-alive
+    type: http
+    schedule: "*/5 * * * *" 
+    url: "https://thuetool-online.onrender.com/healthz"
+    method: GET
