@@ -1,32 +1,35 @@
 const express = require('express');
 const https = require('https');
-const http = require('http'); // vì chính mình là HTTP
+const http = require('http');
 
 const app = express();
-const SELF_URL = 'http://localhost:3000';
-const TARGET_URL = 'https://thuetool-online.onrender.com/api/ping';
 
-function pingBackend() {
-  https.get(TARGET_URL, res => {
-    console.log(`[PING] Backend OK ${res.statusCode}`);
-  }).on('error', err => {
+const BACKEND_URL = 'https://thuetool-online.onrender.com/api/v1/ping/ping';
+const PORT = process.env.PORT || 3000;
+
+function pingTargets() {
+  // Ping backend
+  https.get(BACKEND_URL, (res) => {
+    console.log(`[PING] Backend ${res.statusCode}`);
+  }).on('error', (err) => {
     console.error(`[PING] Backend failed: ${err.message}`);
   });
 
-  http.get(SELF_URL, res => {
-    console.log(`[PING] Self OK ${res.statusCode}`);
-  }).on('error', err => {
+  // Ping self (dùng đúng PORT thực tế)
+  http.get(`http://localhost:${PORT}`, (res) => {
+    console.log(`[PING] Self ${res.statusCode}`);
+  }).on('error', (err) => {
     console.error(`[PING] Self failed: ${err.message}`);
   });
 }
 
-setInterval(pingBackend, 5 * 60 * 1000); // mỗi 5 phút
-pingBackend(); // lần đầu
+pingTargets();
+setInterval(pingTargets, 5 * 60 * 1000);
 
 app.get('/', (_, res) => {
-  res.send('✅ Keepalive Web Service đang chạy!');
+  res.send('✅ Keepalive service is running');
 });
 
-app.listen(3000, () => {
-  console.log('✅ Keepalive Web Service khởi động tại cổng 3000');
+app.listen(PORT, () => {
+  console.log(`✅ Keepalive service started on port ${PORT}`);
 });
