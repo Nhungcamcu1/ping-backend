@@ -1,0 +1,7 @@
+services:
+  - type: cron
+    name: keep-backend-alive
+    schedule: "*/5 * * * *"
+    env: node
+    plan: free
+    startCommand: curl -s https://thuetool-online.onrender.com/api/ping > /dev/null
