@@ -1,0 +1,8 @@
+{
+  "name": "keep-backend-alive",
+  "version": "1.0.0",
+  "main": "ping-worker.js",
+  "scripts": {
+    "start": "node ping-worker.js"
+  }
+}
