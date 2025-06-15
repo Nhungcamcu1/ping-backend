@@ -1,35 +1,34 @@
+/**
+ * SERVICE A
+ * - Ping Service B (được chỉ định qua biến PARTNER_URL)
+ * - Ping BACKEND_URL (/api/ping) để giữ backend chính sống
+ */
 const express = require('express');
 const https = require('https');
 const http = require('http');
 
-const app = express();
-
-const BACKEND_URL = 'https://thuetool-online.onrender.com/api/v1/ping/ping';
+const app  = express();
 const PORT = process.env.PORT || 3000;
 
-function pingTargets() {
-  // Ping backend
-  https.get(BACKEND_URL, (res) => {
-    console.log(`[PING] Backend ${res.statusCode}`);
-  }).on('error', (err) => {
-    console.error(`[PING] Backend failed: ${err.message}`);
-  });
+const PARTNER_URL = process.env.PARTNER_URL;            // URL service B (https://service-b.onrender.com)
+const BACKEND_URL = process.env.BACKEND_URL;            // https://thuetool-online.onrender.com/api/ping
 
-  // Ping self (dùng đúng PORT thực tế)
-  http.get(`http://localhost:${PORT}`, (res) => {
-    console.log(`[PING] Self ${res.statusCode}`);
-  }).on('error', (err) => {
-    console.error(`[PING] Self failed: ${err.message}`);
+function ping(url, label) {
+  const mod = url.startsWith('https') ? https : http;
+  mod.get(url, res => {
+    console.log(`[PING ${label}] ${url} → ${res.statusCode}`);
+  }).on('error', err => {
+    console.error(`[PING ${label}] ${url} failed:`, err.message);
   });
 }
 
-pingTargets();
-setInterval(pingTargets, 5 * 60 * 1000);
+function pingLoop() {
+  if (PARTNER_URL) ping(PARTNER_URL, 'PARTNER');
+  if (BACKEND_URL) ping(BACKEND_URL, 'BACKEND');
+}
 
-app.get('/', (_, res) => {
-  res.send('✅ Keepalive service is running');
-});
+pingLoop();                               // chạy ngay khi khởi động
+setInterval(pingLoop, 10 * 60 * 1000);    // sau đó mỗi 10 phút
 
-app.listen(PORT, () => {
-  console.log(`✅ Keepalive service started on port ${PORT}`);
-});
+app.get('/', (_, res) => res.send('Service A alive'));
+app.listen(PORT, () => console.log(`Service A listening on ${PORT}`));
